@@ -6,6 +6,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.qifan.library.RotateLabelView
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -29,7 +30,10 @@ class MainActivity : AppCompatActivity() {
             }
             adapter = RotateLabelAdapter(
                 arrayOf(
-                    RotateLabel("TOP RIGHT", "Hello World", RotateLabel.Type.TOP_RIGHT)
+                    RotateLabel("TOP LEFT", "Shanghai", RotateLabelView.Type.TOP_LEFT),
+                    RotateLabel("TOP RIGHT", "Shanghai", RotateLabelView.Type.TOP_RIGHT),
+                    RotateLabel("BOTTOM LEFT", "Shanghai", RotateLabelView.Type.BOTTOM_LEFT),
+                    RotateLabel("BOTTOM RIGHT", "Shanghai", RotateLabelView.Type.BOTTOM_RIGHT)
                 )
             )
         }
