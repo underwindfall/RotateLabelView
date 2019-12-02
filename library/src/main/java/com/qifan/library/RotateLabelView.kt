@@ -11,28 +11,41 @@ import android.os.Build
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
+import androidx.annotation.ColorRes
+import androidx.annotation.StringRes
 import androidx.annotation.StyleableRes
 import androidx.core.content.ContextCompat
-import kotlin.math.max
+import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
-import kotlin.math.sqrt
 
 /**
  * Created by Qifan on 2019-12-02.
  */
 private const val predicateErrorMessage = "RotateTextView must have all his attributes defined."
+typealias Label = String
 
-class RotateLabelView : View {
+interface RotateLabelComponent {
+    fun setLabel(text: Label)
+    fun setLabel(@StringRes textRes: Int)
+    fun setBackgroundColor(@ColorRes color: Int)
+    fun setTextColor(@ColorRes color: Int)
+    fun setTextSize(textSize: Float)
+}
+
+class RotateLabelView : View, RotateLabelComponent {
     private val DEFAULT_ROTATE_ANGLE = 45
     private val DEFAULT_TEXT_SIZE = 30f
     private val DEFAULT_BACKGROUND_COLOR = android.R.color.black
     private val DEFAULT_TEXT_COLOR = android.R.color.white
 
     private var contentTextSize = sp2px(DEFAULT_TEXT_SIZE)
-    private lateinit var content: String
+    private lateinit var content: Label
     private var rotationAngle: Int = DEFAULT_ROTATE_ANGLE
-    private var tagLengthSize: Float = 0f
+    private val tagLengthSize: Float
+        get() = (contentTextSize / sin(Math.toRadians(rotationAngle.toDouble()))).toFloat() * 1.2f
+    private var backgroundColor: Int = ContextCompat.getColor(context, DEFAULT_BACKGROUND_COLOR)
+    private var textColor: Int = ContextCompat.getColor(context, DEFAULT_BACKGROUND_COLOR)
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -72,14 +85,20 @@ class RotateLabelView : View {
                 ) { predicateErrorMessage }
 
                 getString(R.styleable.RotateLabelView_label)?.apply { content = this }
+                backgroundColor = getColor(
+                    R.styleable.RotateLabelView_background_color,
+                    ContextCompat.getColor(context, DEFAULT_BACKGROUND_COLOR)
+                )
+
+                textColor = getColor(
+                    R.styleable.RotateLabelView_text_color,
+                    ContextCompat.getColor(context, DEFAULT_TEXT_COLOR)
+                )
 
                 paint.apply {
                     style = Paint.Style.FILL
                     isAntiAlias = true
-                    color = getColor(
-                        R.styleable.RotateLabelView_background_color,
-                        ContextCompat.getColor(context, DEFAULT_BACKGROUND_COLOR)
-                    )
+                    color = backgroundColor
                 }
 
                 textPaint.apply {
@@ -92,13 +111,8 @@ class RotateLabelView : View {
                         )
                     rotationAngle =
                         getInt(R.styleable.RotateLabelView_rotation_angle, DEFAULT_ROTATE_ANGLE)
-                    tagLengthSize =
-                        (contentTextSize / sin(Math.toRadians(rotationAngle.toDouble()))).toFloat() * 1.2f
-                    textSize = getDimension(R.styleable.RotateLabelView_text_size, contentTextSize)
-                    color = getColor(
-                        R.styleable.RotateLabelView_text_color,
-                        ContextCompat.getColor(context, DEFAULT_TEXT_COLOR)
-                    )
+                    textSize = contentTextSize
+                    color = textColor
                 }
                 textPaint.getFontMetrics(fontMetrics)
             }
@@ -107,8 +121,19 @@ class RotateLabelView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        refreshAttrs()
         drawBackground(canvas)
         drawText(canvas)
+    }
+
+    private fun refreshAttrs() {
+        textPaint.apply {
+            textSize = contentTextSize
+            color = textColor
+        }
+        paint.apply {
+            color = backgroundColor
+        }
     }
 
 
@@ -151,11 +176,11 @@ class RotateLabelView : View {
 
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-//        val width = min(widthMeasureSpec, heightMeasureSpec)
-//        val size = measureWidth(width)
-//        setMeasuredDimension(size, size)
-        val size = max(widthMeasureSpec, heightMeasureSpec)
+        val width = min(widthMeasureSpec, heightMeasureSpec)
+        val size = measureWidth(width)
         setMeasuredDimension(size, size)
+//        val size = max(widthMeasureSpec, heightMeasureSpec)
+//        setMeasuredDimension(size, size)
     }
 
     private fun measureWidth(size: Int): Int {
@@ -165,13 +190,48 @@ class RotateLabelView : View {
             specSize
         } else {
             val padding = paddingRight + paddingLeft
+            textPaint.textSize = contentTextSize
             val textWidth = textPaint.measureText(content)
-            var result = ((padding + textWidth) * sqrt(2.00)).toInt()
+            var result =
+                (padding + textWidth + tagLengthSize * cos(Math.toRadians(rotationAngle.toDouble()))).toInt()
             if (specMode == MeasureSpec.AT_MOST) {
                 result = min(result, specSize)
             }
             result
         }
+    }
+
+    override fun setLabel(text: Label) {
+        content = text
+        invalidate()
+    }
+
+    override fun setLabel(@StringRes textRes: Int) {
+        content = context.getString(textRes)
+        invalidate()
+    }
+
+    override fun setBackgroundColor(@ColorRes color: Int) {
+        backgroundColor = color
+        invalidate()
+    }
+
+    override fun setTextColor(@ColorRes color: Int) {
+        textColor = color
+        invalidate()
+    }
+
+    override fun setTextSize(textSize: Float) {
+        contentTextSize = sp2px(textSize)
+        invalidate()
+    }
+
+    private fun dp2px(dp: Float): Float {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            dp,
+            Resources.getSystem().displayMetrics
+        )
     }
 
     private fun sp2px(sp: Float): Float {
