@@ -1,11 +1,32 @@
 # RotateLabelView
 >This is library to help you to add a sticky rotation label into your view.
 
+## Import into your project
+
+```
+
+```
+
 ## ScreenShots
  <img src="https://raw.githubusercontent.com/underwindfall/blogAssets/master/lib/RotationLabel/1.png" width="200px" />
  <img src="https://raw.githubusercontent.com/underwindfall/blogAssets/master/lib/RotationLabel/2.png" width="200px" />
  <img src="https://raw.githubusercontent.com/underwindfall/blogAssets/master/lib/RotationLabel/3.png" width="200px" />
  <img src="https://raw.githubusercontent.com/underwindfall/blogAssets/master/lib/RotationLabel/4.png" width="200px" />
+
+## Example Usage
+```xml
+ <com.qifan.library.RotateLabelView
+        android:id="@+id/rotate_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:background_color="@color/colorAccent"
+        app:label="Android"
+        app:layout_constraintEnd_toEndOf="@id/image"
+        app:layout_constraintTop_toTopOf="@id/image"
+        app:text_color="@android:color/white"
+        app:text_size="15sp" />
+```
 
 ## Custom Attributes
 

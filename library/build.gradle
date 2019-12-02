@@ -1,6 +1,24 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.novoda.bintray-release'
+
+publish {
+
+    def groupProjectID = "com.qifan.rotateLabelView"
+    def artifactProjectID = "rotateLabelView"
+    def publishVersionID = "$publish_version"
+
+    userOrg = "undervoid"
+    repoName = "RotateLabelView"
+    groupId = groupProjectID
+    artifactId = artifactProjectID
+    publishVersion = publishVersionID
+    desc = "This is library to help you to add a sticky rotation label into your view."
+    website = "https://github.com/underwindfall/RotateLabelView"
+
+}
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.1"
