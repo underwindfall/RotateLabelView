@@ -31,6 +31,7 @@ interface RotateLabelComponent {
     fun setBackgroundColor(@ColorRes color: Int)
     fun setTextColor(@ColorRes color: Int)
     fun setTextSize(textSize: Float)
+    fun setType(type: RotateLabelView.Type)
 }
 
 class RotateLabelView : View, RotateLabelComponent {
@@ -38,6 +39,7 @@ class RotateLabelView : View, RotateLabelComponent {
     private val DEFAULT_TEXT_SIZE = 30f
     private val DEFAULT_BACKGROUND_COLOR = android.R.color.black
     private val DEFAULT_TEXT_COLOR = android.R.color.white
+    private val DEFAULT_STYLE = Type.TOP_RIGHT
 
     private var contentTextSize = sp2px(DEFAULT_TEXT_SIZE)
     private lateinit var content: Label
@@ -46,6 +48,7 @@ class RotateLabelView : View, RotateLabelComponent {
         get() = (contentTextSize / sin(Math.toRadians(rotationAngle.toDouble()))).toFloat() * 1.2f
     private var backgroundColor: Int = ContextCompat.getColor(context, DEFAULT_BACKGROUND_COLOR)
     private var textColor: Int = ContextCompat.getColor(context, DEFAULT_BACKGROUND_COLOR)
+    private var labelType: Type = DEFAULT_STYLE
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -85,6 +88,16 @@ class RotateLabelView : View, RotateLabelComponent {
                 ) { predicateErrorMessage }
 
                 getString(R.styleable.RotateLabelView_label)?.apply { content = this }
+                getInt(R.styleable.RotateLabelView_type, 0).apply {
+                    labelType = when (this) {
+                        0 -> Type.TOP_LEFT
+                        1 -> Type.TOP_RIGHT
+                        2 -> Type.BOTTOM_LEFT
+                        3 -> Type.BOTTOM_RIGHT
+                        else -> Type.TOP_RIGHT
+                    }
+                }
+
                 backgroundColor = getColor(
                     R.styleable.RotateLabelView_background_color,
                     ContextCompat.getColor(context, DEFAULT_BACKGROUND_COLOR)
@@ -140,29 +153,60 @@ class RotateLabelView : View, RotateLabelComponent {
     private fun drawBackground(canvas: Canvas) {
         val w = width.toFloat()
         val h = height.toFloat()
-
-        val path = Path().apply {
-            reset()
-            lineTo(w, h)
-            lineTo(w, h - tagLengthSize)
-            lineTo(tagLengthSize, 0f)
-            close()
+        val path = when (labelType) {
+            Type.TOP_RIGHT -> Path().apply {
+                reset()
+                lineTo(w, h)
+                lineTo(w, h - tagLengthSize)
+                lineTo(tagLengthSize, 0f)
+                close()
+            }
+            Type.TOP_LEFT -> Path().apply {
+                reset()
+                moveTo(0f, h - tagLengthSize)
+                lineTo(0f, h)
+                lineTo(w, 0f)
+                lineTo(w - tagLengthSize, 0f)
+                close()
+            }
+            Type.BOTTOM_RIGHT -> Path().apply {
+                reset()
+                moveTo(0f, h)
+                lineTo(tagLengthSize, h)
+                lineTo(w, tagLengthSize)
+                lineTo(w, 0f)
+                close()
+            }
+            Type.BOTTOM_LEFT -> Path().apply {
+                reset()
+                moveTo(0f, 0f)
+                lineTo(0f, tagLengthSize)
+                lineTo(w - tagLengthSize, h)
+                lineTo(w, h)
+                close()
+            }
         }
+
         canvas.apply {
             drawPath(path, paint)
         }
     }
-
     private fun drawText(canvas: Canvas) {
         val w = canvas.width
         val h = canvas.height
         val size = min(w, h)
+        val textHeight = fontMetrics.descent - fontMetrics.ascent
+        val (angle, offset) = when (labelType) {
+            Type.TOP_RIGHT -> Pair(rotationAngle.toFloat(), -textHeight / 2)
+            Type.TOP_LEFT -> Pair(-rotationAngle.toFloat(), -textHeight / 2)
+            Type.BOTTOM_RIGHT -> Pair(-rotationAngle.toFloat(), textHeight / 2)
+            Type.BOTTOM_LEFT -> Pair(rotationAngle.toFloat(), textHeight / 2)
+        }
         canvas.apply {
             save()
-            rotate(rotationAngle.toFloat(), (size / 2).toFloat(), (size / 2).toFloat())
-            val textHeight = fontMetrics.descent - fontMetrics.ascent
+            rotate(angle, (size / 2).toFloat(), (size / 2).toFloat())
             val textBaseY =
-                size / 2f - (fontMetrics.descent + fontMetrics.ascent) / 2f - (textHeight) / 2
+                size / 2f - (fontMetrics.descent + fontMetrics.ascent) / 2f +offset
             canvas.drawText(
                 content,
                 (paddingLeft + (size - paddingLeft - paddingRight) / 2).toFloat(),
@@ -179,8 +223,6 @@ class RotateLabelView : View, RotateLabelComponent {
         val width = min(widthMeasureSpec, heightMeasureSpec)
         val size = measureWidth(width)
         setMeasuredDimension(size, size)
-//        val size = max(widthMeasureSpec, heightMeasureSpec)
-//        setMeasuredDimension(size, size)
     }
 
     private fun measureWidth(size: Int): Int {
@@ -226,12 +268,9 @@ class RotateLabelView : View, RotateLabelComponent {
         invalidate()
     }
 
-    private fun dp2px(dp: Float): Float {
-        return TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            dp,
-            Resources.getSystem().displayMetrics
-        )
+    override fun setType(type: Type) {
+        labelType = type
+        invalidate()
     }
 
     private fun sp2px(sp: Float): Float {
@@ -255,5 +294,12 @@ class RotateLabelView : View, RotateLabelComponent {
         } finally {
             typedArray.recycle()
         }
+    }
+
+    enum class Type {
+        TOP_RIGHT,
+        TOP_LEFT,
+        BOTTOM_RIGHT,
+        BOTTOM_LEFT
     }
 }

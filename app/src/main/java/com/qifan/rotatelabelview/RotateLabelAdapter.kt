@@ -13,23 +13,16 @@ import kotlin.random.Random
 /**
  * Created by Qifan on 2019-12-02.
  */
+private const val VIEW_TOP_RIGHT = 0
+private const val VIEW_TOP_LEFT = 1
+private const val VIEW_BOTTOM_RIGHT = 2
+private const val VIEW_BOTTOM_LEFT = 3
 
 data class RotateLabel(
     val title: String,
     val label: Label,
-    val type: Type
-) {
-    enum class Type {
-        TOP_RIGHT,
-        TOP_LEFT,
-        BOTTOM_RIGHT,
-        BOTTOM_LFET,
-        TOP_RIGHT_FILLED,
-        TOP_LEFT_FILLED,
-        BOTTOM_RIGHT_FILLED,
-        BOTTOM_LEFT_FILLED
-    }
-}
+    val type: RotateLabelView.Type
+)
 
 class RotateLabelAdapter(private val dataSource: Array<RotateLabel>) :
     RecyclerView.Adapter<RotateLabelAdapter.RotateLabelViewHolder>() {
@@ -45,17 +38,47 @@ class RotateLabelAdapter(private val dataSource: Array<RotateLabel>) :
     )
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RotateLabelViewHolder {
-        val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_recycler, parent, false)
+        val view = when (viewType) {
+            VIEW_TOP_LEFT -> LayoutInflater.from(parent.context).inflate(
+                R.layout.item_recycler_top_left,
+                parent,
+                false
+            )
+            VIEW_TOP_RIGHT -> LayoutInflater.from(parent.context).inflate(
+                R.layout.item_recycler_top_right,
+                parent,
+                false
+            )
+            VIEW_BOTTOM_LEFT -> LayoutInflater.from(parent.context).inflate(
+                R.layout.item_recycler_bottom_left,
+                parent,
+                false
+            )
+            else -> LayoutInflater.from(parent.context).inflate(
+                R.layout.item_recycler_bottom_right,
+                parent,
+                false
+            )
+        }
         return RotateLabelViewHolder(view)
     }
 
     override fun getItemCount(): Int = dataSource.size
 
+    override fun getItemViewType(position: Int): Int {
+        return when (dataSource[position].type) {
+            RotateLabelView.Type.TOP_LEFT -> VIEW_TOP_LEFT
+            RotateLabelView.Type.TOP_RIGHT -> VIEW_TOP_RIGHT
+            RotateLabelView.Type.BOTTOM_LEFT -> VIEW_BOTTOM_LEFT
+            RotateLabelView.Type.BOTTOM_RIGHT -> VIEW_BOTTOM_RIGHT
+        }
+    }
+
     override fun onBindViewHolder(holder: RotateLabelViewHolder, position: Int) {
         holder.title.text = dataSource[position].title
         holder.rotateLabel.setLabel(dataSource[position].label)
         holder.rotateLabel.setBackgroundColor(RANDOM_COLORS[Random.nextInt(RANDOM_COLORS.size)])
+        holder.rotateLabel.setType(dataSource[position].type)
     }
 
     inner class RotateLabelViewHolder internal constructor(itemView: View) :
