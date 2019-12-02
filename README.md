@@ -8,10 +8,14 @@ implementation 'com.qifan.rotateLabelView:rotateLabelView:1.0.0'
 ```
 
 ## ScreenShots
- <img src="https://raw.githubusercontent.com/underwindfall/blogAssets/master/lib/RotationLabel/1.png" width="200px" />
- <img src="https://raw.githubusercontent.com/underwindfall/blogAssets/master/lib/RotationLabel/2.png" width="200px" />
- <img src="https://raw.githubusercontent.com/underwindfall/blogAssets/master/lib/RotationLabel/3.png" width="200px" />
- <img src="https://raw.githubusercontent.com/underwindfall/blogAssets/master/lib/RotationLabel/4.png" width="200px" />
+<div align="center">
+ <img src="https://raw.githubusercontent.com/underwindfall/blogAssets/master/lib/RotationLabel/1.png" width="200" />
+ <img src="https://raw.githubusercontent.com/underwindfall/blogAssets/master/lib/RotationLabel/2.png" width="200" />
+ </div>
+ <div align="center">
+  <img src="https://raw.githubusercontent.com/underwindfall/blogAssets/master/lib/RotationLabel/3.png" width="200" />
+  <img src="https://raw.githubusercontent.com/underwindfall/blogAssets/master/lib/RotationLabel/4.png" width="200" />
+ </div>
 
 ## Example Usage
 ```xml
