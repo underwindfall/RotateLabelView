@@ -62,4 +62,4 @@ jobs:
           channel: '#android-apps-website'
           url: ${{ secrets.SLACK_WEBHOOK_URL }}
           commit: true
-          token: ${{ secrets.CI_LIB_TOKEN }}  
+          token: ${{ secrets.GITHUB_TOKEN }}
