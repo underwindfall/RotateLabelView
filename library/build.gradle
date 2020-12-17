@@ -63,7 +63,7 @@ afterEvaluate {
             release(MavenPublication) {
                 groupId = "com.qifan.rotateLabelView"
                 artifactId = "rotateLabelView"
-                version = "1.0.0"
+                version = "1.0.1"
                 artifact androidSourcesJar
                 artifact androidJavadocsJar
                 pom {
@@ -105,7 +105,7 @@ bintray {
         licenses = ['Apache-2.0']
         publish = true
         version {
-            name = "1.0.0"
+            name = "1.0.1"
         }
         publications = ['release']
     }
